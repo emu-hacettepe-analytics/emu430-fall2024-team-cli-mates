@@ -5,9 +5,25 @@ title: "Data"
 Data source: Meteoroloji Genel Müdürlüğü, TÜİK, NASA
 
 
-### General Information About Data
-The dataset is compiled from national sources, primarily the Turkish Statistical Institute (TÜİK) and the Turkish Meteorological Service (MGM). The data is organized according to IBBS (Statistical Region Units Classification) Level 3, covering 81 provinces in Turkey. It integrates multi-dimensional variables, including land use types (cultivated, fallow, and specialized crop areas) and long-term climatic parameters such as average precipitation and temperature.
+## 1. General Information About Data
+The "Drought Risk Analysis" project focuses on the intersection of environmental stress and economic resilience in Türkiye. By analyzing long-term climate trends alongside agricultural output, we aim to uncover the hidden costs of climate change.
 
-### Reason to Choose This Data Set
+### 1.1 Why We Selected This Data
+We selected this dataset for the EMU430 course because it allows us to quantify the environmental shifts and their correlation with agricultural output. Understanding how daily precipitation and temperature affect the monetary value of crops is essential for Turkey's sustainable development.
 
-By selecting this integrated dataset, the study aims to establish a quantitative link between climate change and agricultural sustainability. The primary objective is to analyze how fluctuations in rainfall and increasing temperatures directly affect different types of agricultural lands. This data-driven approach allows for the identification of high-risk drought zones, enabling the development of early warning systems and the prioritization of alternative irrigation projects to ensure food security and production efficiency.
+### 1.2  Our Objectives
+To analyze the steady climb of regional temperatures and its impact on water stress.  To differentiate between nominal agricultural growth and real production value after adjusting for inflation.  To investigate the "Correlation Paradox" between rainfall amounts and crop value.  
+
+
+## 2.Data Preprocessing
+### 2.1 Dataset Overview
+-Thermal Data (T2M): Average temperature at 2 meters above the earth's surface,
+
+-Hydrological Data (PRECTOTCORR): Corrected daily precipitation amounts ($mm/day$)
+
+-Agricultural Value: The monetary value of crop production (Thousand TL) at provincial and regional levels.
+
+
+
+
+
