@@ -1,20 +1,29 @@
 ---
-title: "Team XXX"
+title: "Team Cli-Mates"
 sidebar: false 
 ---
 
-This is our project webpage.
+Welcome to our project webpage! 
 
-Please stay tuned to follow our project activities.
+This project aims to determine whether agricultural lands in Turkey are at risk of drought due to climate change.
 
-This is our template.
 
 # Team Members
 
-1.  Ebru Gizem Bozdoğan     
+1. [Ebru Gizem Bozdoğan](Ebrunun_github_linki)
 
-2.  Meral İnci Yüzgüleç
+2. [Meral İnci Yüzgüleç](https://github.com/incihh)
 
 # Project Topic
+**Identifying Agricultural Lands at Risk of Drought**
 
-# Data Set ????????????
+With climate change, decreasing rainfall and increasing temperatures directly affect agricultural production. Our goal is to identify areas at risk of drought by analyzing climate data from different regions. 
+
+By analyzing datasets obtained from the Turkish Statistical Institute (TÜİK) and the Turkish Meteorological Service (MGM), the project aims to identify agricultural lands at risk of drought throughout Turkey. This study will provide decision-makers with a data-driven perspective in terms of agricultural production planning and drought risk management.
+
+# Data Set
+
+We mainly utilized open data from:
+
+* **TÜİK** (Turkish Statistical Institute)
+* **MGM** (Turkish State Meteorological Service)

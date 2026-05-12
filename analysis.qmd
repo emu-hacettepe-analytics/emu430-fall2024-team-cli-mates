@@ -2,8 +2,376 @@
 title: "Analysis"
 ---
 
-About this site
+
+1. Introduction & Data Overview
+Climate change is no longer a future projection but a present reality for Turkey. Positioned in the Mediterranean basin, the country faces unique vulnerabilities. This Exploratory Data Analysis (EDA) aims to quantify the environmental shifts and their correlation with agricultural output.
+
+The Dataset
+The analysis integrates three primary data streams:
+
+Thermal Data (T2M): Average temperature at 2 meters above the earth's surface (°C).
+
+Hydrological Data (PRECTOTCORR): Corrected precipitation amounts (mm/day).
+
+Agricultural Value: The monetary value of crop production (Thousand TL) at the provincial level, aggregated into regional totals.
+
+The data was wrangled to ensure temporal consistency and spatial alignment, transforming raw provincial Excel files and regional CSVs into a "Tidy Data" format for robust visualization.
+
+
+2. Hydrological Shifts: Precipitation Volatility
+While temperature shows a steady climb, precipitation is characterized by its unpredictability. For an agrarian economy, the distribution of water is as critical as the total amount.
+```{r}
+#| label: turkiye-bolgeler-sicaklik
+#| message: false
+
+#| label: turkiye-tum-bolgeler-yagis
+#| message: false
+#| warning: false
+
+library(tidyverse)
+
+
+marmara_pr <- read_csv("data/marmara_precipitaion2000-2025.csv", skip = 9) %>% mutate(Region = "Marmara")
+ic_anadolu_pr <- read_csv("data/içanadolu_precipitaion.csv", skip = 9) %>% mutate(Region = "İç Anadolu")
+akdeniz_pr <- read_csv("data/akdeniz_precipitation.csv", skip = 9) %>% mutate(Region = "Akdeniz")
+dogu_anadolu_pr <- read_csv("data/doguanadolu_precipitation.csv", skip = 9) %>% mutate(Region = "Doğu Anadolu")
+ege_pr <- read_csv("data/egebölgesi_precipitaion_average2000-2025.csv", skip = 9) %>% mutate(Region = "Ege")
+guneydogu_anadolu_pr <- read_csv("data/guneydoguanadolu_precipitation.csv", skip = 9) %>% mutate(Region = "Güneydoğu Anadolu")
+karadeniz_pr <- read_csv("data/karadeniz_precipitation.csv", skip = 9) %>% mutate(Region = "Karadeniz")
+
+
+turkiye_precip_all <- bind_rows(
+  marmara_pr, ic_anadolu_pr, akdeniz_pr, dogu_anadolu_pr,
+  ege_pr, guneydogu_anadolu_pr, karadeniz_pr
+)
+
+
+turkiye_bolge_yagis <- turkiye_precip_all %>%
+  group_by(YEAR, Region) %>%
+  summarise(Bolge_Ortalama_Yagis = mean(ANN, na.rm = TRUE), .groups = "drop")
+
+
+ggplot(turkiye_bolge_yagis, aes(x = YEAR, y = Bolge_Ortalama_Yagis, fill = Region)) +
+  geom_bar(stat = "identity", alpha = 0.7) + 
+  geom_smooth(method = "lm", color = "darkblue", se = FALSE, linetype = "solid", size = 0.8) + 
+  facet_wrap(~ Region, ncol = 3) + 
+  labs(
+    title = "Türkiye'nin 7 Bölgesinde Yıllık Ortalama Yağış Miktarı (2000-2025)",
+    subtitle = "Renkli sütunlar yıllık ortalamayı, koyu mavi çizgi ise genel yağış eğilimini gösterir",
+    x = "Yıl",
+    y = "Ortalama Yağış (mm/gün)"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(size = 11, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+Analysis of Water Stress
+The Black Sea region remains the outlier with high and relatively stable precipitation. However, the Aegean and Central Anatolia regions—Turkey's primary grain and fruit baskets—show concerning levels of volatility. The downward or stagnant trend lines in these regions, combined with rising temperatures, indicate a high risk of "evapotranspiration," where plants lose moisture faster than the soil can replenish it.
+
+
+Next stage of our EDA explores how the economic value of crops has changed alongside these climatic shifts.
+```{r}
+
+#| label: turkiye-7-bolge-sicaklik
+#| message: false
+#| warning: false
+
+library(tidyverse)
+
+# Fonksiyon: Dosyayı oku, ilk 9 satırı atla ve bölge ismi ekle
+read_region <- function(file_path, region_name) {
+  read_csv(file_path, skip = 9) %>%
+    mutate(Region = region_name)
+}
+
+# Tüm sıcaklık dosyalarını oku ve birleştir
+turkiye_temp <- bind_rows(
+  read_region("data/akdeniz_T2M.csv", "Akdeniz"),
+  read_region("data/doguanadolu_T2M.csv", "Doğu Anadolu"),
+  read_region("data/ege_bölgesi_temperatureat2metersrange_2000-2025.csv", "Ege"),
+  read_region("data/guneydoguanadolu_tT2M.csv", "Güneydoğu Anadolu"),
+  read_region("data/içanadolu_T2M.csv", "İç Anadolu"),
+  read_region("data/karadeniz_T2M.csv", "Karadeniz"),
+  read_region("data/marmara_T2M_2000-2025.csv", "Marmara")
+)
+
+# Bölge bazlı yıllık sıcaklık özeti
+turkiye_bolge_ozet <- turkiye_temp %>%
+  group_by(YEAR, Region) %>%
+  summarise(Bolge_Ortalama_Sicaklik = mean(ANN, na.rm = TRUE), .groups = "drop")
+
+# Grafik: 7 Bölge Yan Yana
+ggplot(turkiye_bolge_ozet, aes(x = YEAR, y = Bolge_Ortalama_Sicaklik, color = Region)) +
+  geom_line(linewidth = 1) + # 'size' yerine 'linewidth' güncel sürümler için daha iyidir
+  geom_smooth(method = "lm", color = "black", linetype = "dashed", linewidth = 0.5) +
+  facet_wrap(~ Region, ncol = 3) + 
+  labs(
+    title = "Türkiye'nin 7 Bölgesinde Yıllık Ortalama Sıcaklık Değişimi (2000-2025)",
+    x = "Yıl",
+    y = "Sıcaklık (°C)"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(size = 11, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1) 
+  ) # <-- Eksik olan parantez burasıydı, eklendi.
+```
+```{r}
+
+
+
+library(readxl)
+library(ggplot2)
+library(scales)
+
+# Excel dosyasından sadece verilerin olduğu C5:D31 aralığını okuyoruz.
+# col_names ile sütunlara kendimiz isim veriyoruz ki işimiz kolaylaşsın.
+veri <- read_excel("data/uretim_turkiye.xlsx", 
+                   range = "C5:D31", 
+                   col_names = c("Yil", "Uretim_Degeri"))
+
+# Excel'de metin olarak algılanan yılları ve üretim değerlerini sayıya çeviriyoruz
+veri$Yil <- as.numeric(veri$Yil)
+veri$Uretim_Degeri <- as.numeric(veri$Uretim_Degeri)
+
+# ggplot2 ile zaman serisi çizgi grafiğini oluşturuyoruz
+ggplot(veri, aes(x = Yil, y = Uretim_Degeri)) +
+  geom_line(color = "#2c3e50", linewidth = 1.2) +    
+  geom_point(color = "#e74c3c", size = 2.5) +        
+  labs(
+    title = "Türkiye Bitkisel Üretim Değeri (1995 - 2021)",
+    subtitle = "Yıllara Göre Üretim Değişimi",
+    x = "Yıl",
+    y = "Bitkisel Üretim Değeri (Bin TL)"
+  ) +
+  scale_x_continuous(breaks = seq(min(veri$Yil), max(veri$Yil), by = 2)) +
+  scale_y_continuous(labels = comma_format(big.mark = ".", decimal.mark = ",")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.text.x = element_text(angle = 45, hjust = 1) 
+  )
+```
+
+
+The nominal value of agricultural production has grown exponentially, especially in the Mediterranean and Aegean regions. While this appears positive, it must be viewed with caution. This rise is likely influenced by inflation and the shift toward high-value, export-oriented greenhouse crops. The divergence between "rising value" and "deteriorating climate conditions" suggests that Turkish agriculture is becoming increasingly capital-intensive, requiring more investment in irrigation and fertilizers to combat climate stress.
+
+
 
 ```{r}
-1 + 1
+
+
+library(tidyverse)
+library(readxl)
+library(scales)
+library(ggplot2)
+
+# --- 1. YAĞIŞ VERİSİNİN HAZIRLANMASI ---
+# (Mevcut CSV dosyalarının data klasöründe olduğu varsayılmaktadır)
+marmara_pr <- read_csv("data/marmara_precipitaion2000-2025.csv", skip = 9) %>% mutate(Region = "Marmara")
+ic_anadolu_pr <- read_csv("data/içanadolu_precipitaion.csv", skip = 9) %>% mutate(Region = "İç Anadolu")
+akdeniz_pr <- read_csv("data/akdeniz_precipitation.csv", skip = 9) %>% mutate(Region = "Akdeniz")
+dogu_anadolu_pr <- read_csv("data/doguanadolu_precipitation.csv", skip = 9) %>% mutate(Region = "Doğu Anadolu")
+
+turkiye_precip_all <- bind_rows(marmara_pr, ic_anadolu_pr, akdeniz_pr, dogu_anadolu_pr)
+
+# Yıllık ortalama yağışı hesaplıyoruz
+yagis_verisi <- turkiye_precip_all %>%
+  group_by(YEAR) %>%
+  summarise(Ortalama_Yagis = mean(ANN, na.rm = TRUE)) %>%
+  rename(Yil = YEAR) # Birleştirme kolaylığı için sütun adını "Yil" yapıyoruz
+
+# --- 2. ÜRETİM VERİSİNİN HAZIRLANMASI ---
+# (uretim_turkiye.xlsx dosyasının data klasöründe olduğu varsayılmaktadır)
+uretim_verisi <- read_excel("data/uretim_turkiye.xlsx", 
+                            range = "C5:D31", 
+                            col_names = c("Yil", "Uretim_Degeri"))
+
+uretim_verisi$Yil <- as.numeric(uretim_verisi$Yil)
+uretim_verisi$Uretim_Degeri <- as.numeric(uretim_verisi$Uretim_Degeri)
+
+# --- 3. VERİLERİ BİRLEŞTİRME (Sadece ortak yıllar) ---
+# inner_join sadece her iki veri setinde de olan yılları korur (Örn: 2000-2021 arası)
+birlesik_veri <- inner_join(yagis_verisi, uretim_verisi, by = "Yil")
+
+# --- 4. KORELASYON GRAFİĞİ (Scatter Plot) ---
+# Korelasyon katsayısını hesaplayıp grafiğe ekleyebiliriz (isteğe bağlı ama güzel durur)
+korelasyon <- cor(birlesik_veri$Ortalama_Yagis, birlesik_veri$Uretim_Degeri, use = "complete.obs")
+
+ggplot(birlesik_veri, aes(x = Ortalama_Yagis, y = Uretim_Degeri)) +
+  geom_point(color = "#e74c3c", size = 3) + 
+  # Trend çizgisi ekliyoruz (doğrusal ilişkiyi görmek için)
+  geom_smooth(method = "lm", color = "#2c3e50", se = TRUE, fill = "lightblue", alpha = 0.5) + 
+  labs(
+    title = "Türkiye: Yağış Miktarı ile Bitkisel Üretim Değeri İlişkisi",
+    subtitle = paste("Sadece Ortak Yıllar (", min(birlesik_veri$Yil), " - ", max(birlesik_veri$Yil), ") | Korelasyon (r): ", round(korelasyon, 2), sep=""),
+    x = "Ortalama Yağış (mm/gün)",
+    y = "Bitkisel Üretim Değeri (Bin TL)"
+  ) +
+  # Üretim değeri büyük sayılar olduğu için okunabilirliği artırıyoruz
+  scale_y_continuous(labels = comma_format(big.mark = ".", decimal.mark = ",")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14)
+  )
 ```
+
+```{r}
+
+
+
+
+library(tidyverse)
+library(readxl)
+library(scales)
+
+# --- 1. BİTKİSEL ÜRETİM VERİSİ ---
+# Veriyi okuyup yıllar ve değerleri sayısal formata çeviriyoruz
+uretim_veri <- read_excel("data/uretim_turkiye.xlsx", 
+                          range = "C5:D31", 
+                          col_names = c("Yil", "Uretim_Degeri")) %>%
+  mutate(
+    Yil = as.numeric(Yil),
+    Uretim_Degeri = as.numeric(Uretim_Degeri)
+  )
+
+# --- 2. TARIM ALANLARI VERİSİ ---
+# Veriyi okuyup temizliyoruz
+alan_veri <- read_excel("data/tarimurunualanlar.xlsx", skip = 3)
+colnames(alan_veri) <- c("Ana_Kategori", "Alan_Turu", "Yil", "Alan")
+
+temiz_alan_veri <- alan_veri %>%
+  fill(Alan_Turu, .direction = "down") %>% 
+  filter(!is.na(Yil)) %>%
+  mutate(
+    Yil = as.numeric(Yil),
+    Alan = as.numeric(Alan)
+  ) %>%
+  # ÖNEMLİ: Üretim verisi Türkiye geneli toplam olduğu için,
+  # o yıla ait tüm farklı alan türlerini (meyve, sebze, tahıl vb.) topluyoruz.
+  group_by(Yil) %>%
+  summarise(Toplam_Alan = sum(Alan, na.rm = TRUE))
+
+# --- 3. VERİLERİ BİRLEŞTİRME VE ORANLAMA ---
+# Sadece iki dosyada da olan (ortak) yılları birleştiriyoruz
+birlesik_veri <- inner_join(uretim_veri, temiz_alan_veri, by = "Yil") %>%
+  mutate(
+    # İsteğin doğrultusunda: Bitkisel Üretim / Tarım Alanı
+    Birim_Alan_Degeri = Uretim_Degeri / Toplam_Alan
+  )
+
+# --- 4. GÖRSELLEŞTİRME ---
+ggplot(birlesik_veri, aes(x = Yil, y = Birim_Alan_Degeri)) +
+  geom_line(color = "#8e44ad", linewidth = 1.2) + # Çizgi rengi (Mor tonlarında)
+  geom_point(color = "#2c3e50", size = 3) +       # Nokta rengi
+  # Genel trendi görmek için istersen aşağıdaki satırın başındaki '#' işaretini kaldırabilirsin
+  # geom_smooth(method = "lm", color = "gray50", linetype = "dashed", se = FALSE) +
+  labs(
+    title = "Türkiye: Birim Tarım Alanı Başına Üretim Değeri",
+    subtitle = "Hesaplama: Toplam Bitkisel Üretim Değeri / Toplam Tarım Alanı",
+    x = "Yıl",
+    y = "Birim Alan Değeri (Bin TL / Dekar)"
+  ) +
+  scale_x_continuous(breaks = seq(min(birlesik_veri$Yil), max(birlesik_veri$Yil), by = 2)) +
+  scale_y_continuous(labels = comma_format(big.mark = ".", decimal.mark = ",")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+```{r}
+
+
+
+#| label: bolgesel-tarim-analizi
+#| message: false
+#| warning: false
+
+
+library(readxl)   # Excel okumak için tek çözüm budur
+library(tidyverse)
+library(scales)
+
+yol <- "data/uretim_il.xlsx"
+df <- read_excel(yol, col_names = FALSE)
+
+
+sehirler <- as.character(df[2, 4:ncol(df)])
+
+# Veri 3. satırdan başlıyor. 3. sütun YIL, 4. sütun ve sonrası ŞEHİR DEĞERLERİ
+ham_veri <- df[3:nrow(df), 3:ncol(df)]
+colnames(ham_veri) <- c("Yil", sehirler)
+
+# 4. TEMİZLE VE UZUN FORMATA ÇEVİR
+uzun_veri <- ham_veri %>%
+  mutate(Yil = as.numeric(Yil)) %>%
+  filter(!is.na(Yil)) %>% # Yıl olmayan satırları at
+  pivot_longer(
+    cols = -Yil, 
+    names_to = "Il", 
+    values_to = "Uretim_Degeri"
+  ) %>%
+  mutate(
+    Uretim_Degeri = as.numeric(Uretim_Degeri),
+    # "Adana-1" gibi isimleri sadece "Adana" yapıyoruz
+    Il = trimws(gsub("-[0-9]+", "", Il)) 
+  ) %>%
+  filter(!is.na(Uretim_Degeri))
+# 5. BÖLGE EŞLEŞTİRMESİ (Sayılar eşitlendi: Toplam 83 satır)
+bolge_haritasi <- data.frame(
+  Il = c(
+    # Marmara (11 isim)
+    "Edirne", "Kırklareli", "Tekirdağ", "İstanbul", "Kocaeli", "Yalova", "Sakarya", "Bilecik", "Bursa", "Balıkesir", "Çanakkale",
+    # Ege (9 isim)
+    "İzmir", "Manisa", "Aydın", "Denizli", "Muğla", "Afyonkarahisar", "Afyon", "Kütahya", "Uşak",
+    # Akdeniz (9 isim)
+    "Antalya", "Burdur", "Isparta", "Mersin", "İçel", "Adana", "Hatay", "Osmaniye", "Kahramanmaraş",
+    # İç Anadolu (13 isim)
+    "Ankara", "Konya", "Karaman", "Eskişehir", "Kayseri", "Nevşehir", "Yozgat", "Sivas", "Kırıkkale", "Kırşehir", "Niğde", "Aksaray", "Çankırı",
+    # Karadeniz (18 isim)
+    "Amasya", "Artvin", "Bartın", "Bayburt", "Bolu", "Çorum", "Düzce", "Giresun", "Gümüşhane", "Karabük", "Kastamonu", "Ordu", "Rize", "Samsun", "Sinop", "Tokat", "Trabzon", "Zonguldak",
+    # Doğu Anadolu (14 isim)
+    "Ağrı", "Ardahan", "Bingöl", "Bitlis", "Elazığ", "Erzincan", "Erzurum", "Hakkari", "Iğdır", "Kars", "Malatya", "Muş", "Tunceli", "Van",
+    # Güneydoğu Anadolu (9 isim)
+    "Adıyaman", "Batman", "Diyarbakır", "Gaziantep", "Kilis", "Mardin", "Siirt", "Şanlıurfa", "Şırnak"
+  ),
+  Bolge = c(
+    rep("Marmara", 11), 
+    rep("Ege", 9),            # 10'dan 9'a düşürdük
+    rep("Akdeniz", 9), 
+    rep("İç Anadolu", 13), 
+    rep("Karadeniz", 18), 
+    rep("Doğu Anadolu", 14), 
+    rep("Güneydoğu Anadolu", 9)
+  )
+)
+bolge_ozet <- uzun_veri %>%
+  left_join(bolge_haritasi, by = "Il") %>%
+  filter(!is.na(Bolge)) %>%
+  group_by(Yil, Bolge) %>%
+  summarise(Toplam_Uretim = sum(Uretim_Degeri, na.rm = TRUE), .groups = "drop")
+
+# 7. GÖRSELLEŞTİRME (Yan yana 7 Bölge Grafiği)
+ggplot(bolge_ozet, aes(x = Yil, y = Toplam_Uretim, fill = Bolge)) +
+  geom_col(alpha = 0.8) +
+  facet_wrap(~ Bolge, ncol = 3, scales = "free_y") + # Her bölgenin grafiğini ayır
+  labs(
+    title = "Türkiye'nin Bölgelerine Göre Bitkisel Üretim Değeri (2000-2025)",
+    subtitle = "Değerler Bin TL cinsindendir",
+    x = "Yıl",
+    y = "Toplam Üretim (Bin TL)"
+  ) +
+  scale_y_continuous(labels = label_number(big.mark = ".", decimal.mark = ",")) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    strip.text = element_text(size = 10, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
+
