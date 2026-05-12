@@ -449,3 +449,4 @@ ggplot(bolge_ozet, aes(x = Yil, y = Toplam_Uretim, fill = Bolge)) +
 ```
 
 
+

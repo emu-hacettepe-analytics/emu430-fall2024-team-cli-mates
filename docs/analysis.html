@@ -318,7 +318,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction-data-overview" id="toc-introduction-data-overview" class="nav-link active" data-scroll-target="#introduction-data-overview">1. Introduction &amp; Data Overview</a></li>
+  <li><a href="#hydrological-shifts-precipitation-volatility" id="toc-hydrological-shifts-precipitation-volatility" class="nav-link" data-scroll-target="#hydrological-shifts-precipitation-volatility">2. Hydrological Shifts: Precipitation Volatility</a></li>
+  </ul>
+</nav>
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
@@ -347,17 +354,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<ol type="1">
-<li>Introduction &amp; Data Overview Climate change is no longer a future projection but a present reality for Turkey. Positioned in the Mediterranean basin, the country faces unique vulnerabilities. This Exploratory Data Analysis (EDA) aims to quantify the environmental shifts and their correlation with agricultural output.</li>
-</ol>
+<section id="introduction-data-overview" class="level2">
+<h2 class="anchored" data-anchor-id="introduction-data-overview">1. Introduction &amp; Data Overview</h2>
+<p>Climate change is no longer a future projection but a present reality for Turkey. Positioned in the Mediterranean basin, the country faces unique vulnerabilities. This Exploratory Data Analysis (EDA) aims to quantify the environmental shifts and their correlation with agricultural output.</p>
 <p>The Dataset The analysis integrates three primary data streams:</p>
 <p>Thermal Data (T2M): Average temperature at 2 meters above the earth’s surface (°C).</p>
 <p>Hydrological Data (PRECTOTCORR): Corrected precipitation amounts (mm/day).</p>
 <p>Agricultural Value: The monetary value of crop production (Thousand TL) at the provincial level, aggregated into regional totals.</p>
 <p>The data was wrangled to ensure temporal consistency and spatial alignment, transforming raw provincial Excel files and regional CSVs into a “Tidy Data” format for robust visualization.</p>
-<ol start="2" type="1">
-<li>Hydrological Shifts: Precipitation Volatility While temperature shows a steady climb, precipitation is characterized by its unpredictability. For an agrarian economy, the distribution of water is as critical as the total amount.</li>
-</ol>
+</section>
+<section id="hydrological-shifts-precipitation-volatility" class="level1">
+<h1>2. Hydrological Shifts: Precipitation Volatility</h1>
+<p>While temperature shows a steady climb, precipitation is characterized by its unpredictability. For an agrarian economy, the distribution of water is as critical as the total amount.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Kodu görmek için tıklayın</summary>
@@ -822,6 +830,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 
 
+</section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
