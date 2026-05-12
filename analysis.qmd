@@ -10,7 +10,8 @@ execute:
 ---
 
 
-1. Introduction & Data Overview
+## 1. Introduction & Data Overview
+
 Climate change is no longer a future projection but a present reality for Turkey. Positioned in the Mediterranean basin, the country faces unique vulnerabilities. This Exploratory Data Analysis (EDA) aims to quantify the environmental shifts and their correlation with agricultural output.
 
 The Dataset
