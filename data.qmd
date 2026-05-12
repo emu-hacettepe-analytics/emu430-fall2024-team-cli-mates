@@ -2,4 +2,12 @@
 title: "Data"
 ---
 
-Data source: xxx
+Data source: Meteoroloji Genel Müdürlüğü, TÜİK, NASA
+
+
+### General Information About Data
+The dataset is compiled from national sources, primarily the Turkish Statistical Institute (TÜİK) and the Turkish Meteorological Service (MGM). The data is organized according to IBBS (Statistical Region Units Classification) Level 3, covering 81 provinces in Turkey. It integrates multi-dimensional variables, including land use types (cultivated, fallow, and specialized crop areas) and long-term climatic parameters such as average precipitation and temperature.
+
+### Reason to Choose This Data Set
+
+By selecting this integrated dataset, the study aims to establish a quantitative link between climate change and agricultural sustainability. The primary objective is to analyze how fluctuations in rainfall and increasing temperatures directly affect different types of agricultural lands. This data-driven approach allows for the identification of high-risk drought zones, enabling the development of early warning systems and the prioritization of alternative irrigation projects to ensure food security and production efficiency.

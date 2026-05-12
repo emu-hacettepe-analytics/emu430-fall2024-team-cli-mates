@@ -1,5 +1,12 @@
 ---
-title: "Analysis"
+title: "Drought Risk Analysis"
+format:
+  html:
+    code-fold: true
+    code-summary: "Kodu görmek için tıklayın"
+execute:
+  warning: false
+  message: false
 ---
 
 
@@ -75,6 +82,9 @@ The Black Sea region remains the outlier with high and relatively stable precipi
 Next stage of our EDA explores how the economic value of crops has changed alongside these climatic shifts.
 ```{r}
 
+
+#| code-fold: true
+#| code-summary: "Veri Yükleme ve Birleştirme Adımları"
 #| label: turkiye-7-bolge-sicaklik
 #| message: false
 #| warning: false
