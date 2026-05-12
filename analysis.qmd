@@ -169,6 +169,68 @@ ggplot(veri, aes(x = Yil, y = Uretim_Degeri)) +
 
 
 The nominal value of agricultural production has grown exponentially, especially in the Mediterranean and Aegean regions. While this appears positive, it must be viewed with caution. This rise is likely influenced by inflation and the shift toward high-value, export-oriented greenhouse crops. The divergence between "rising value" and "deteriorating climate conditions" suggests that Turkish agriculture is becoming increasingly capital-intensive, requiring more investment in irrigation and fertilizers to combat climate stress.
+```{r}
+
+# Gerekli kütüphaneler
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+# 1. Üretim verisini okuma
+veri <- read_excel("data/uretim_turkiye.xlsx", 
+                   range = "C5:D31", 
+                   col_names = c("Yil", "Uretim_Degeri"))
+
+veri$Yil <- as.numeric(veri$Yil)
+veri$Uretim_Degeri <- as.numeric(veri$Uretim_Degeri)
+
+# 2. Enflasyon verisini okuma 
+# DİKKAT 1: read_csv YERİNE read_excel KULLANIYORUZ!
+# DİKKAT 2: read_excel isimsiz sütunlara ...1, ...2, ...3 isimlerini verir.
+tufe_raw <- suppressMessages(read_excel("data/enflasyon.xlsx", 
+                                        col_names = FALSE, 
+                                        n_max = 24))
+
+# İlk sütunu Yıl olan satırları alıp ayları (...2 ile ...13 arası) seçiyoruz
+tufe_df <- tufe_raw %>%
+  mutate(Yil = suppressWarnings(as.numeric(...1))) %>%
+  filter(!is.na(Yil)) %>%
+  select(Yil, ...2:...13) %>%
+  distinct(Yil, .keep_all = TRUE) # Çift okuma ihtimaline karşı sadece gerçek endeksi tut
+
+# Aylık endeks değerlerini sayısal tipe çevirme
+tufe_df[, 2:13] <- lapply(tufe_df[, 2:13], function(x) suppressWarnings(as.numeric(x)))
+
+# Yıllık ortalama TÜFE endeksini hesaplıyoruz (12 ayın ortalaması)
+tufe_df$Yillik_Tufe <- rowMeans(tufe_df[, 2:13], na.rm = TRUE)
+
+# Sadece Yıl ve Yıllık Ortalama TÜFE'yi ayırıyoruz
+tufe_secili <- tufe_df %>% select(Yil, Yillik_Tufe)
+
+# 3. Verileri Birleştirme ve Reel Değer Hesaplama
+# Reel Değer = (Nominal Değer / Yıllık TÜFE Endeksi) * 100
+birlesik_veri <- inner_join(veri, tufe_secili, by = "Yil") %>%
+  mutate(Reel_Uretim_Degeri = (Uretim_Degeri / Yillik_Tufe) * 100)
+
+# 4. Enflasyondan Arındırılmış Grafiği Çizdirme
+ggplot(birlesik_veri, aes(x = Yil, y = Reel_Uretim_Degeri)) +
+  geom_line(color = "#2c3e50", linewidth = 1.2) +    
+  geom_point(color = "#e74c3c", size = 2.5) +        
+  labs(
+    title = "Türkiye Bitkisel Üretim Değeri (Enflasyondan Arındırılmış)",
+    subtitle = "Yıllara Göre Reel Üretim Değişimi (2003 = 100 Bazlı Fiyatlarla)",
+    x = "Yıl",
+    y = "Reel Bitkisel Üretim Değeri (Bin TL)"
+  ) +
+  scale_x_continuous(breaks = seq(min(birlesik_veri$Yil), max(birlesik_veri$Yil), by = 2)) +
+  scale_y_continuous(labels = comma_format(big.mark = ".", decimal.mark = ",")) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    axis.text.x = element_text(angle = 45, hjust = 1) 
+  )
+```
 
 
 
@@ -384,4 +446,5 @@ ggplot(bolge_ozet, aes(x = Yil, y = Toplam_Uretim, fill = Bolge)) +
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 ```
+
 
